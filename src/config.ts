@@ -27,15 +27,15 @@ export const config = {
       | 'shimmer',
   },
   session: {
-    thresholdHours: parseFloat(optional('SESSION_THRESHOLD_HOURS', '2')),
-    cooldownMinutes: parseInt(optional('NUDGE_COOLDOWN_MINUTES', '60'), 10),
+    thresholdHours: 0.01,  // TEST MODE: ~36s (ปกติ: SESSION_THRESHOLD_HOURS=2)
+    cooldownMinutes: 0,    // TEST MODE: no cooldown (ปกติ: NUDGE_COOLDOWN_MINUTES=60)
     inactivityResetMinutes: 30,
   },
   quiet: {
-    start: parseInt(optional('QUIET_START', '23'), 10), // 23:00
-    end: parseInt(optional('QUIET_END', '7'), 10),      // 07:00
+    start: parseInt(optional('QUIET_START', '23'), 10),
+    end: parseInt(optional('QUIET_END', '7'), 10),
   },
   cron: {
-    checkInterval: '*/15 * * * *', // every 15 minutes
+    checkInterval: '* * * * *', // TEST MODE: every 1 min (ปกติ: */15)
   },
 } as const;
