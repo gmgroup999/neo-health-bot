@@ -1,6 +1,6 @@
 # CLAUDE.md — NEO Health Bot
 
-> อัปเดตล่าสุด: 2026-05-27 (Session 2)
+> อัปเดตล่าสุด: 2026-05-27 (Session 3)
 
 ---
 
@@ -21,6 +21,15 @@ Group: `JcAfee, Neo Health and neo` (ID: `-5029847683`)
 - Deploy ครั้งแรกบน Z Node ผ่าน PSCP + plink
 - แก้ 409 Conflict (local bot vs Z Node bot polling พร้อมกัน)
 - ยืนยัน bot รับ message จากกลุ่มได้
+
+### Session 3 (2026-05-27 เย็น)
+1. **ลบ `version: '3.9'`** ออกจาก `docker-compose.yml` — หาย obsolete warning
+2. **ตั้ง git repository** — `git init`, `.gitattributes`, `.gitignore` อัปเดต (เพิ่ม `data/`, `.claude/`)
+3. **สร้าง GitHub Actions CI/CD** — `.github/workflows/deploy.yml` (appleboy/scp-action + ssh-action)
+4. **Push to GitHub** — https://github.com/gmgroup999/neo-health-bot (Private repo)
+5. **ตั้ง GitHub Secrets** — `SSH_HOST`, `SSH_USER`, `SSH_PASSWORD`, `SSH_PORT`
+6. **CI/CD ทำงานสำเร็จ** ✅ — push → auto deploy Z Node ใน ~22s
+7. **ลบ `deploy-znode.sh`** (legacy script มี key เก่า — GitHub Push Protection บล็อก)
 
 ### Session 2 (2026-05-27 บ่าย)
 1. **ลบ debug log** ออกจาก `bot.ts` (privacy — เคย log content ทุก message)
@@ -124,6 +133,20 @@ docker exec neo-health-bot sh -c 'sqlite3 /app/data/neo-health.db "SELECT * FROM
 
 Container restart policy: `always` — reboot แล้ว start เองอัตโนมัติ
 
+### CI/CD (GitHub Actions)
+```bash
+# แค่ push code → deploy อัตโนมัติ
+git add .
+git commit -m "feat: your change"
+git push
+
+# ดู pipeline ที่:
+# https://github.com/gmgroup999/neo-health-bot/actions
+```
+- Workflow: `.github/workflows/deploy.yml`
+- Trigger: push to `main`
+- Steps: SCP files → SSH → `docker compose up -d --build` → prune images
+
 ---
 
 ## 🤖 Bot Commands
@@ -188,8 +211,8 @@ Cron ทุก 15 นาที
 ## 📝 TODO — งานที่ค้างอยู่
 
 - [ ] **ทดสอบ nudge จริง** — รอ session ครบ 2 ชั่วโมงในกลุ่ม แล้วดูว่าบอทส่งข้อความ + voice เข้ากลุ่มได้
-- [ ] **ตั้ง git repository** — ยังไม่มี version control, deploy แบบ manual (PSCP)
-- [ ] **CI/CD pipeline** — อยากให้ push code แล้ว deploy อัตโนมัติ
+- [x] ~~**ตั้ง git repository**~~ — เสร็จแล้ว 2026-05-27 (https://github.com/gmgroup999/neo-health-bot)
+- [x] ~~**CI/CD pipeline**~~ — เสร็จแล้ว 2026-05-27 (GitHub Actions → auto deploy Z Node)
 - [x] ~~**ลบ `version:` ออกจาก docker-compose.yml**~~ — เสร็จแล้ว 2026-05-27
 
 ---
@@ -199,10 +222,6 @@ Cron ทุก 15 นาที
 ### 1. ไม่มี persistent session หากลบ volume
 ถ้ารัน `docker compose down -v` จะลบ SQLite ไปด้วย
 → ควร backup DB เป็นประจำ หรือ mount ไปที่ host path แทน volume
-
-### 3. ไม่มี version control (git)
-- แก้ code ต้อง re-upload ด้วย PSCP ทุกครั้ง
-- ไม่มี history ว่าแก้อะไรไปบ้าง
 
 ---
 
