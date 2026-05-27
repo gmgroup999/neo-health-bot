@@ -29,7 +29,15 @@ logger.info('NEO Health Bot starting up…');
 // ────────────────────────────────────────────────────────────
 
 function isQuietHours(): boolean {
-  const hour = new Date().getHours();
+  // Server runs UTC — use Bangkok timezone (UTC+7) for quiet-hour logic
+  const hour = parseInt(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Bangkok',
+      hour: 'numeric',
+      hour12: false,
+    }).format(new Date()),
+    10
+  );
   const { start, end } = config.quiet;
   if (start > end) return hour >= start || hour < end;
   return hour >= start && hour < end;
